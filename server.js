@@ -12,7 +12,7 @@ app.use(express.json({ extended: false }));
 app.get('/', (req, res) => res.send('API running'));
 
 //Define routes
-app.use('/api/handlers', require('./routes/api/handlers'));
+app.use('/api/handler', require('./routes/api/handlers'));
 app.use('/api/auth', require('./routes/api/auth'));
 app.use('/api/order', require('./routes/api/orders'));
 app.use('/api/item', require('./routes/api/items'));

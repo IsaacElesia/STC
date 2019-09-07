@@ -25,6 +25,30 @@ const HandlerSchema = new mongoose.Schema({
   avatar: {
     type: String
   },
+  address: {
+    street: {
+      type: String,
+      required: true
+    },
+    apt:{
+      type: String
+    },
+    city: {
+      type: String,
+      required: true
+    },
+    state: {
+      type: String,
+      required: true
+    },
+    zip: {
+      type: String
+    },
+    country: {
+      type: String,
+      required: true
+    }
+  },
   date: {
     type: Date,
     default: Date.now
