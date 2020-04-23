@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -13,256 +12,256 @@ const Handler = require('../../models/Handler');
 //@desc     Register handler
 //@access   Public
 router.post(
-  '/',
-  [
-    check('name', 'Name is required')
-      .not()
-      .isEmpty(),
-    check('role', 'Role is required')
-      .not()
-      .isEmpty(),
-    check('street', 'Street is required')
-      .not()
-      .isEmpty(),
-    check('city', 'City is required')
-      .not()
-      .isEmpty(),
-    check('state', 'State is required')
-      .not()
-      .isEmpty(),
-    check('country', 'Country is required')
-      .not()
-      .isEmpty(),
-    check('email', 'Please include a valid email').isEmail(),
-    check('phone', 'Please include a valid phone number').isMobilePhone(),
-    check(
-      'password',
-      'Please enter a password with 6 or more characters'
-    ).isLength({ min: 6 })
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+	'/',
+	[
+		check('name', 'Name is required').not().isEmpty(),
+		check('role', 'Role is required').not().isEmpty(),
+		check('street', 'Street is required').not().isEmpty(),
+		check('city', 'City is required').not().isEmpty(),
+		check('state', 'State is required').not().isEmpty(),
+		check('country', 'Country is required').not().isEmpty(),
+		check('email', 'Please include a valid email').isEmail(),
+		check('phone', 'Please include a valid phone number').isMobilePhone(),
+		check(
+			'password',
+			'Please set a password with 6 or more characters'
+		).isLength({ min: 6 }),
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
 
-    const {
-      name,
-      email,
-      role,
-      phone,
-      street,
-      apt,
-      city,
-      zip,
-      state,
-      country,
-      password
-    } = req.body;
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
 
-    //Get handler gravatar
-    const avatar = gravatar.url(email, {
-      s: '200',
-      r: 'pg',
-      d: 'mm'
-    });
+		const {
+			name,
+			email,
+			role,
+			phone,
+			street,
+			apt,
+			city,
+			zip,
+			state,
+			country,
+			password,
+		} = req.body;
 
-    // Build handler object
-    const handlerFields = {};
-    if (name) handlerFields.name = name;
-    if (email) handlerFields.email = email;
-    if (role) handlerFields.role = role;
-    if (phone) handlerFields.phone = phone;
-    if (avatar) handlerFields.avatar = avatar;
-    if (password) handlerFields.password = password;
+		JSON.stringify(
+			name,
+			email,
+			role,
+			phone,
+			street,
+			apt,
+			city,
+			zip,
+			state,
+			country,
+			password
+		);
 
-    // Build address object
-    handlerFields.address = {};
-    if (street) handlerFields.address.street = street;
-    if (apt) handlerFields.address.apt = apt;
-    if (city) handlerFields.address.city = city;
-    if (zip) handlerFields.address.zip = zip;
-    if (state) handlerFields.address.state = state;
-    if (country) handlerFields.address.country = country;
+		// Build handler object
+		const handlerFields = {};
+		if (name) handlerFields.name = name;
+		if (email) handlerFields.email = email;
+		if (role) handlerFields.role = role;
+		if (phone) handlerFields.phone = phone;
+		if (password) handlerFields.password = password;
 
-    try {
-      //See if handler exist
-      let handler = await Handler.findOne({ email });
+		//Build avatar object / handler pics
+		handlerFields.avatar = {};
 
-      if (handler) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: 'Handler already exists.' }] });
-      }
+		// Build address object
+		handlerFields.address = {};
+		if (street) handlerFields.address.street = street;
+		if (apt) handlerFields.address.apt = apt;
+		if (city) handlerFields.address.city = city;
+		if (zip) handlerFields.address.zip = zip;
+		if (state) handlerFields.address.state = state;
+		if (country) handlerFields.address.country = country;
 
-      //Create handler
-      handler = new Handler(handlerFields);
+		try {
+			//See if handler exist
+			let handler = await Handler.findOne({ email });
 
-      //Encrypt password
-      const salt = await bcrypt.genSalt(10);
-      handler.password = await bcrypt.hash(password, salt);
+			if (handler) {
+				return res
+					.status(400)
+					.json({ errors: [{ msg: 'Handler already exists.' }] });
+			}
 
-      //Save handler
-      await handler.save();
+			//Create handler
+			handler = new Handler(handlerFields);
 
-      //return JsonWebToken
-      const payload = {
-        handler: {
-          id: handler.id
-        }
-      };
+			//Encrypt password
+			const salt = await bcrypt.genSalt(10);
+			handler.password = await bcrypt.hash(password, salt);
 
-      jwt.sign(
-        payload,
-        config.get('jwtSecret'),
-        { expiresIn: 360000 },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
+			//Save handler
+			await handler.save();
+
+			//return JsonWebToken
+			const payload = {
+				handler: {
+					id: handler.id,
+				},
+			};
+
+			jwt.sign(
+				payload,
+				config.get('jwtSecret'),
+				{ expiresIn: 360000 },
+				(err, token) => {
+					if (err) throw err;
+					res.json({ token });
+				}
+			);
+		} catch (err) {
+			console.error(err.message);
+			res.status(500).send('Server Error');
+		}
+	}
 );
 
 // @route    POST api/handler/update
 // @desc     Update handler details
 // @access   Private
 router.post(
-  '/update',
-  [
-    auth,
-    [
-      check('name', 'Name is required')
-        .not()
-        .isEmpty(),
-      check('role', 'Role is required')
-        .not()
-        .isEmpty(),
-      check('street', 'Street is required')
-        .not()
-        .isEmpty(),
-      check('city', 'City is required')
-        .not()
-        .isEmpty(),
-      check('state', 'State is required')
-        .not()
-        .isEmpty(),
-      check('country', 'Country is required')
-        .not()
-        .isEmpty(),
-      check('email', 'Please include a valid email').isEmail(),
-      check('phone', 'Please include a valid phone number').isMobilePhone()
-    ]
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+	'/update',
+	[
+		auth,
+		[
+			check('name', 'Name is required').not().isEmpty(),
+			check('role', 'Role is required').not().isEmpty(),
+			check('street', 'Street is required').not().isEmpty(),
+			check('city', 'City is required').not().isEmpty(),
+			check('state', 'State is required').not().isEmpty(),
+			check('country', 'Country is required').not().isEmpty(),
+			check('email', 'Please include a valid email').isEmail(),
+			check('phone', 'Please include a valid phone number').isMobilePhone(),
+		],
+	],
+	async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
 
-    const {
-      name,
-      email,
-      role,
-      phone,
-      street,
-      apt,
-      city,
-      zip,
-      state,
-      country
-    } = req.body;
+		const {
+			name,
+			email,
+			role,
+			phone,
+			street,
+			apt,
+			city,
+			zip,
+			state,
+			country,
+		} = req.body;
 
-    // Build handler object
-    const handlerFields = {};
-    if (name) handlerFields.name = name;
-    if (email) handlerFields.email = email;
-    if (role) handlerFields.role = role;
-    if (phone) handlerFields.phone = phone;
+		// Build handler object
+		const handlerFields = {};
+		if (name) handlerFields.name = name;
+		if (email) handlerFields.email = email;
+		if (role) handlerFields.role = role;
+		if (phone) handlerFields.phone = phone;
 
-    // Build address object
-    handlerFields.address = {};
-    if (street) handlerFields.address.street = street;
-    if (apt) handlerFields.address.apt = apt;
-    if (city) handlerFields.address.city = city;
-    if (zip) handlerFields.address.zip = zip;
-    if (state) handlerFields.address.state = state;
-    if (country) handlerFields.address.country = country;
+		//Build avatar object / handler pics
+		/* 	handlerFields.avatar = {};
+		if (req.files.file) const file = req.files.file;
 
-    try {
-      let handler = await Handler.findById(req.handler.id);
+		file.mv(`${__dirname}/client/public/img/handlers/${file.name}`, (err) => {
+			if (err) {
+				console.error(err);
+				return res.status(500).send(err);
+			}
 
-      if (handler) {
-        // Update
-        handler = await Handler.findOneAndUpdate(
-          { id: req.id },
-          { $set: handlerFields },
-          { new: true }
-        );
+			handlerFields.avatar.name = file.name;
+			handlerFields.avatar.location = `/img/handlers/${file.name}`;
+		}); */
 
-        return res.json(handler);
-      }
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
-    }
-  }
+		// Build address object
+		handlerFields.address = {};
+		if (street) handlerFields.address.street = street;
+		if (apt) handlerFields.address.apt = apt;
+		if (city) handlerFields.address.city = city;
+		if (zip) handlerFields.address.zip = zip;
+		if (state) handlerFields.address.state = state;
+		if (country) handlerFields.address.country = country;
+
+		try {
+			let handler = await Handler.findById(req.handler.id);
+
+			if (handler) {
+				// Update
+				handler = await Handler.findOneAndUpdate(
+					{ id: req.id },
+					{ $set: handlerFields },
+					{ new: true }
+				);
+
+				return res.json(handler);
+			}
+		} catch (err) {
+			console.error(err.message);
+			res.status(500).send('Server Error');
+		}
+	}
 );
 
-// @route    GET api/hander/me
+// @route    GET api/handler/me
 // @desc     Get current handler details
 // @access   Private
 router.get('/me', auth, async (req, res) => {
-  try {
-    const handler = await Handler.findById(req.handler.id).select('-password');
+	try {
+		const handler = await Handler.findById(req.handler.id).select('-password');
 
-    if (!handler) {
-      return res.status(400).json({ msg: 'This handler does not exist' });
-    }
+		if (!handler) {
+			return res.status(400).json({ msg: 'This handler does not exist' });
+		}
 
-    res.json(handler);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
+		res.json(handler);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
 });
 
 // @route    GET api/handler
 // @desc     Get all handlers
 // @access   private
 router.get('/', auth, async (req, res) => {
-  try {
-    const handler = await Handler.find().select('-password');
-    res.json(handler);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
+	try {
+		const handler = await Handler.find().select('-password');
+		res.json(handler);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
 });
 
 // @route    GET api/handler/:handler_id
 // @desc     Get handler by handler ID
 // @access   Public
 router.get('/:handler_id', auth, async (req, res) => {
-  try {
-    const handler = await Handler.findOne({
-      _id: req.params.handler_id
-    }).select('-password');
+	try {
+		const handler = await Handler.findOne({
+			_id: req.params.handler_id,
+		}).select('-password');
 
-    if (!handler) return res.status(400).json({ msg: 'Handler not found' });
+		if (!handler) return res.status(400).json({ msg: 'Handler not found' });
 
-    res.json(handler);
-  } catch (err) {
-    console.error(err.message);
-    if (err.kind == 'ObjectId') {
-      return res.status(400).json({ msg: 'Handler not found' });
-    }
-    res.status(500).send('Server Error');
-  }
+		res.json(handler);
+	} catch (err) {
+		console.error(err.message);
+		if (err.kind == 'ObjectId') {
+			return res.status(400).json({ msg: 'Handler not found' });
+		}
+		res.status(500).send('Server Error');
+	}
 });
 
 module.exports = router;
