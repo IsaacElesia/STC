@@ -53,7 +53,7 @@ export const register = ({
 		},
 	};
 
-	const body = {
+	const body = JSON.stringify({
 		name,
 		email,
 		role,
@@ -66,7 +66,7 @@ export const register = ({
 		country,
 		password,
 		avatar,
-	};
+	});
 
 	/* 	axios
     .all([

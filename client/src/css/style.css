@@ -674,6 +674,23 @@ dd {
 /* **********************************
 				Handler Details
 *************************************/
+.edit-handler {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  align-items: center;
+}
+
 .handler {
   max-height: 100vh;
   margin-top: 8rem;
@@ -737,7 +754,7 @@ dd {
   cursor: pointer;
 }
 
-.btn-new, .btn-signup {
+.btn-new, .btn-signup, .btn-go-back {
   background-color: #f2f2f2;
   color: #333;
   color: #591e08;
@@ -749,7 +766,7 @@ dd {
           box-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.2);
 }
 
-.btn-new:hover, .btn-signup:hover {
+.btn-new:hover, .btn-signup:hover, .btn-go-back:hover {
   background-color: #591e08;
   color: #f2f2f2;
   color: #f2f2f2;
@@ -769,6 +786,23 @@ dd {
   background-color: #fff;
   border: 4px solid #e7d9d9;
   cursor: pointer;
+}
+
+.go-back {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  align-items: center;
 }
 
 .handler-signup {

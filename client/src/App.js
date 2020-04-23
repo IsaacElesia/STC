@@ -10,9 +10,11 @@ import setAuthToken from './utils/setAuthToken';
 import Login from './components/auth/Login';
 import Header from './components/layout/Header';
 import Orders from './components/orders/Orders';
+import CurrentHandler from './components/handlers/CurrentHandler';
 import Handlers from './components/handlers/Handlers';
 import Handler from './components/handlers/Handler';
 import NewHandler from './components/handlers/NewHandler';
+import UpdateHandler from './components/handlers/UpdateHandler';
 import NotFound from './components/NotFound';
 import Alert from './components/layout/Alert';
 import PrivateRoute from './components/routing/PrivateRoute';
@@ -35,8 +37,10 @@ const App = () => {
 					<Route exact path='/' component={Login} />
 					<PrivateRoute path='/home/orders' component={Orders} />
 					<PrivateRoute path='/home/handlers' component={Handlers} />
-					<PrivateRoute path='/home/handler' component={Handler} />
+					<PrivateRoute path='/home/handler/:id' component={Handler} />
+					<PrivateRoute path='/home/handler' component={CurrentHandler} />
 					<PrivateRoute path='/home/newhandler' component={NewHandler} />
+					<PrivateRoute path='/home/edithandler' component={UpdateHandler} />
 					<Route path='/' component={NotFound} />
 				</Switch>
 			</Router>

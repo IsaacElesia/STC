@@ -33,6 +33,12 @@
 /* **********************************
 				Handler Details
 *************************************/
+.edit-handler {
+	@include display-flex(row);
+	justify-content: flex-end;
+	align-items: center;
+}
+
 .handler {
 	max-height: 100vh;
 	margin-top: 8rem;

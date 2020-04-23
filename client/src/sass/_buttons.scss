@@ -6,7 +6,8 @@
 	cursor: pointer;
 
 	&-new,
-	&-signup {
+	&-signup,
+	&-go-back {
 		@include set-bg-color($primary-color);
 		color: $secondary-color;
 		font-size: 1.5rem;
@@ -37,4 +38,10 @@
 			cursor: pointer;
 		}
 	}
+}
+
+.go-back {
+	@include display-flex(row);
+	justify-content: flex-end;
+	align-items: center;
 }
